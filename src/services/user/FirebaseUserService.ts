@@ -8,23 +8,46 @@ export default class FirebaseUserService implements UserService{
         try{
             const usersRef = collection(firestore, "users");
             const q = query(usersRef, where("uid", "==", uid));
-            const querySnapshot = await getDocs(q);
+            const snapshot = await getDocs(q)
 
-            if (querySnapshot.empty) {
-                throw new Error("No user document found for the current user.");
+            if (snapshot.empty) {
+                throw new Error("No user document found for the requested user.");
             }
 
-            const doc = querySnapshot.docs[0];
+            const doc = snapshot.docs[0]
+            
             // !!! zod?
-            const user = doc.data();
+            const user = doc.data()
 
-            return {
+            return ({
                 id: doc.id,
                 firstname: user.firstname,
                 lastname: user.lastname,
                 displayName: user.displayName,
                 uid: user.uid
-            };
+            })
+        }catch(error : unknown){
+            console.error(error)
+            throw error
+        }
+    }
+
+    async getAll(): Promise<IUser[]> {
+        try{
+            const usersCollection = collection(firestore, "users");
+            const snapshot = await getDocs(usersCollection);
+            const users = snapshot.docs.map(doc => {
+                // !!! zod?
+                const user = doc.data()
+                return ({
+                    id: doc.id,
+                    firstname: user.firstname,
+                    lastname: user.lastname,
+                    displayName: user.displayName,
+                    uid: user.uid
+                })
+            })
+            return users
         }catch(error : unknown){
             console.error(error)
             throw error
