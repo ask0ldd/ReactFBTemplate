@@ -3,12 +3,14 @@ import {useState} from 'react';
 import './App.css'
 import { FirebaseError } from 'firebase/app';
 import FirebaseAuthService from './services/auth/FirebaseAuthService';
-import { auth, firestore } from './firebase';
-import { collection, doc, getDoc, getDocs, query, where } from 'firebase/firestore';
+import { auth } from './firebase';
+import FirebaseUserService from './services/user/FirebaseUserService';
 
 // https://hackernoon.com/how-to-set-up-firebase-authentication-with-react
 // https://firebase.google.com/docs/auth
 // https://www.youtube.com/watch?v=WpIDez53SK4&t=2s
+
+// https://rnfirebase.io/#installation-for-expo-projects
 
 function App() {
 
@@ -53,25 +55,12 @@ function App() {
       const user = auth.currentUser;
       if (!user) throw new Error("No user is currently signed in.");
 
-      // Query for the current user using indexed field 'uid'
-      const usersRef = collection(firestore, "users");
-      const q = query(usersRef, where("uid", "==", user.uid));
-      const querySnapshot = await getDocs(q);
+      const userService = new FirebaseUserService()
 
-      if (querySnapshot.empty) {
-        console.warn("No user document found for the current user.");
-        return;
-      }
+      const retrievedUser = await userService.findByUID(user.uid)
+      console.log(JSON.stringify(retrievedUser))
 
-      // Process user document(s) as needed
-      querySnapshot.forEach((doc) => {
-        // Avoid logging sensitive data in production
-        console.log("User document : ", { id: doc.id, ...doc.data() });
-      });
-
-      const usersCollection = collection(firestore, "users");
-      const snapshot = await getDocs(usersCollection);
-      const users = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      const users = await userService.getAll()
       console.log("All users : ", users);
 
     } catch (error: unknown) {
