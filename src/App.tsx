@@ -5,6 +5,7 @@ import { FirebaseError } from 'firebase/app';
 import FirebaseAuthService from './services/auth/FirebaseAuthService';
 import { auth } from './firebase';
 import FirebaseUserService from './services/user/FirebaseUserService';
+import { useAuthContext } from './hooks/context/useAuth';
 
 // https://hackernoon.com/how-to-set-up-firebase-authentication-with-react
 // https://firebase.google.com/docs/auth
@@ -18,6 +19,8 @@ function App() {
   const [password, setPassword] = useState<string>('');
   const [emailR, setEmailR] = useState<string>('');
   const [passwordR, setPasswordR] = useState<string>('');
+
+  const  {authenticatedUser} = useAuthContext()
 
   async function handleLogin(event : React.FormEvent) {
     event.preventDefault()
@@ -74,16 +77,21 @@ function App() {
     }
   }
 
-        /*const userDocRef = doc(firestore, "users", uid)
-      const usersSnapshot = await getDoc(userDocRef)
-      if (usersSnapshot.exists()) {
-        console.log("User data:", usersSnapshot.data())
-      } else {
-        console.log("doesn't exist")
-      }*/
+    /*const userDocRef = doc(firestore, "users", uid)
+  const usersSnapshot = await getDoc(userDocRef)
+  if (usersSnapshot.exists()) {
+    console.log("User data:", usersSnapshot.data())
+  } else {
+    console.log("doesn't exist")
+  }*/
+
+  function handleDisconnectUser(){
+    auth.signOut()
+  }
 
   return (
     <main>
+      <div>{authenticatedUser?.email ?? ''}</div>
       <form onSubmit={handleLogin}>
         <label htmlFor="email">Login</label>
         <input
@@ -125,6 +133,8 @@ function App() {
       </form>
 
       <button style={{ marginTop: '60px', width:'100%', maxWidth:'600px' }} onClick={handleRetrieveUser}>getUser</button>
+      
+      <button style={{ marginTop: '60px', width:'100%', maxWidth:'600px' }} onClick={handleDisconnectUser}>Disconnect</button>
     </main>
   );
 }
