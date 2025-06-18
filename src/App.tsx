@@ -6,6 +6,7 @@ import FirebaseAuthService from './services/auth/FirebaseAuthService';
 import { auth } from './firebase';
 import FirebaseUserService from './services/user/FirebaseUserService';
 import { useAuthContext } from './hooks/context/useAuth';
+import { useServicesContext } from './hooks/context/useServices';
 
 // https://hackernoon.com/how-to-set-up-firebase-authentication-with-react
 // https://firebase.google.com/docs/auth
@@ -20,12 +21,13 @@ function App() {
   const [emailR, setEmailR] = useState<string>('');
   const [passwordR, setPasswordR] = useState<string>('');
 
-  const  {authenticatedUser} = useAuthContext()
+  const {authenticatedUser} = useAuthContext()
+  const {authService, userService} = useServicesContext()
 
   async function handleLogin(event : React.FormEvent) {
     event.preventDefault()
     try {
-      const authService = new FirebaseAuthService()
+      // const authService = new FirebaseAuthService()
       const user = await authService.signInWithEmailAndPassword(email, password)
       console.log(JSON.stringify(user))
     } catch (error : unknown) {
@@ -40,7 +42,7 @@ function App() {
   async function handleRegister(event : React.FormEvent){
     event.preventDefault()
     try{
-      const authService = new FirebaseAuthService()
+      // const authService = new FirebaseAuthService()
       const user = await authService.createUserWithEmailAndPassword(emailR, passwordR)
       console.log(JSON.stringify(user))
     } catch (error : unknown) {
@@ -58,7 +60,7 @@ function App() {
       const user = auth.currentUser;
       if (!user) throw new Error("No user is currently signed in.");
 
-      const userService = new FirebaseUserService()
+      // const userService = new FirebaseUserService()
 
       const retrievedUser = await userService.findByUID(user.uid)
       console.log(JSON.stringify(retrievedUser))
