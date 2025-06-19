@@ -1,7 +1,8 @@
-import { collection, getDocs, query, where } from "firebase/firestore";
+import { collection, doc, getDocs, query, setDoc, where } from "firebase/firestore";
 import type IUser from "./interfaces/IUser";
 import type { UserService } from "./interfaces/UserService";
 import { firestore } from "../../firebase";
+import userSchema from "../../zod/userSchema";
 
 export default class FirebaseUserService implements UserService{
     async findByUID(uid: string): Promise<IUser> {
@@ -54,4 +55,27 @@ export default class FirebaseUserService implements UserService{
         }
     }
 
+    // addDoc for auto-generated IDs, or setDoc if you want to use a custom ID
+    async insert(user : Omit<IUser, 'id'>) : Promise<IUser>{
+        try {
+            // Optional: Validate user data (uncomment and adapt as needed)
+            const parsedUser = userSchema.parse(user);
+
+            const usersRef = collection(firestore, "users");
+            // Create a document reference with the user's UID as the document ID
+            const userDocRef = doc(usersRef, parsedUser.uid);
+            // Set the document data
+            await setDoc(userDocRef, parsedUser);
+
+            // Return the inserted user with the new document ID
+            return {
+                id: parsedUser.uid,
+                ...parsedUser
+            };
+        } catch (error: unknown) {
+            // !!! deal with ZodError instance
+            console.error("Error inserting user:", error);
+            throw error;
+        }
+    }
 }

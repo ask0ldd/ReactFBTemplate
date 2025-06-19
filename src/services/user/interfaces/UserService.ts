@@ -3,7 +3,7 @@ import type IUser from "./IUser";
 export interface UserService {
   findByUID(uid : string) : Promise<IUser>
   getAll() : Promise<IUser[]>
-  /*insert(user : Omit<IUser, 'id'>) : Promise<IUser>
-  updateByUID(uid : string, user : Omit<IUser, 'id'>) : Promise<IUser>
+  insert(user : Omit<IUser, 'id'>) : Promise<IUser>
+  /*updateByUID(uid : string, user : Omit<IUser, 'id'>) : Promise<IUser>
   deleteByUID(uid : string) : Promise<void>*/
 }
