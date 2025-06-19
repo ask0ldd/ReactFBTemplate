@@ -105,6 +105,50 @@ function App() {
     }
   }
 
+  async function handleUpdateIdentity(event : React.MouseEvent){
+    event.preventDefault();
+    try {
+      const user = auth.currentUser;
+      if (!user) throw new Error("No user is currently signed in.");
+
+      // const userService = new FirebaseUserService()
+
+      const retrievedUser = await userService.findByUID(user.uid)
+      console.log(JSON.stringify(retrievedUser))
+
+      const users = await userService.getAll()
+      console.log("All users : ", users);
+
+    } catch (error: unknown) {
+      if (error instanceof FirebaseError) {
+        console.error("Firebase error:", error.message);
+      } else if (error instanceof Error) {
+        console.error("Error:", error.message);
+      } else {
+        console.error("Unknown error:", error);
+      }
+    }
+  }
+
+  async function handleUpdateIdentity2(event : React.MouseEvent){
+    event.preventDefault();
+    try {
+
+      const user = auth.currentUser;
+      if (!user) throw new Error("No user is currently signed in.");
+      await userService.updateUserNames(user.uid, {firstname : 'john', lastname : 'doe'})
+
+    } catch (error: unknown) {
+      if (error instanceof FirebaseError) {
+        console.error("Firebase error:", error.message);
+      } else if (error instanceof Error) {
+        console.error("Error:", error.message);
+      } else {
+        console.error("Unknown error:", error);
+      }
+    }
+  }
+
     /*const userDocRef = doc(firestore, "users", uid)
   const usersSnapshot = await getDoc(userDocRef)
   if (usersSnapshot.exists()) {
@@ -164,6 +208,7 @@ function App() {
       
       <button style={{ marginTop: '60px', width:'100%', maxWidth:'600px' }} onClick={handleDisconnectUser}>Disconnect</button>
       <button style={{ marginTop: '60px', width:'100%', maxWidth:'600px' }} onClick={handleDeleteUser}>Delete Active User</button>
+      <button style={{ marginTop: '60px', width:'100%', maxWidth:'600px' }} onClick={handleUpdateIdentity2}>Update Active User</button>
     </main>
   );
 }
