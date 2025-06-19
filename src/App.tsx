@@ -20,6 +20,9 @@ function App() {
   const [password, setPassword] = useState<string>('');
   const [emailR, setEmailR] = useState<string>('');
   const [passwordR, setPasswordR] = useState<string>('');
+  const [displayNameR, setDisplayNameR] = useState<string>('');
+  const [firstnameR, setFirstnameR] = useState<string>('');
+  const [lastnameR, setLastnameR] = useState<string>('');
 
   const {authenticatedUser} = useAuthContext()
   const {authService, userService} = useServicesContext()
@@ -44,7 +47,14 @@ function App() {
     try{
       // const authService = new FirebaseAuthService()
       const user = await authService.createUserWithEmailAndPassword(emailR, passwordR)
-      console.log(JSON.stringify(user))
+      if(user.uid == null) throw new Error("No UID generated.")
+      userService.insert({
+        uid: user.uid,
+        firstname : firstnameR,
+        lastname : lastnameR,
+        displayName : displayNameR,
+      })
+      // console.log(JSON.stringify(user))
     } catch (error : unknown) {
       if (error instanceof FirebaseError) {
         console.error('Firebase error:', error.message);
@@ -111,27 +121,27 @@ function App() {
           value={password}
           onChange={e => setPassword(e.target.value)}
         />
-        <input type="submit" value="Submit" style={{ marginTop: '20px' }}/>
+        <input type="submit" value="Login" style={{ marginTop: '20px' }}/>
       </form>
 
       <form onSubmit={handleRegister}>
-        <label htmlFor="email">LoginR</label>
-        <input
-          id="emailR"
-          name="emailR"
-          type="text"
-          value={emailR}
-          onChange={e => setEmailR(e.target.value)}
-        />
-        <label htmlFor="passwordR" style={{ marginTop: '20px' }}>PasswordR</label>
-        <input
-          id="passwordR"
-          name="passwordR"
-          type="password"
-          value={passwordR}
-          onChange={e => setPasswordR(e.target.value)}
-        />
-        <input type="submit" value="Submit" style={{ marginTop: '20px' }}/>
+
+        <label htmlFor="email">Register Login</label>
+        <input id="emailR" name="emailR" type="text" value={emailR} onChange={e => setEmailR(e.target.value)} />
+
+        <label htmlFor="passwordR" style={{ marginTop: '20px' }}>Register Password</label>
+        <input id="passwordR" name="passwordR" type="password" value={passwordR} onChange={e => setPasswordR(e.target.value)} />
+
+        <label htmlFor="displayNameR" style={{ marginTop: '20px' }}>Register Username</label>
+        <input id="displayNameR" name="displayNameR" type="text" value={displayNameR} onChange={e => setDisplayNameR(e.target.value)} />
+        
+        <label htmlFor="firstnameR" style={{ marginTop: '20px' }}>Register Firstname</label>
+        <input id="firstnameR" name="firstnameR" type="text" value={firstnameR} onChange={e => setFirstnameR(e.target.value)} />
+        
+        <label htmlFor="lastnameR" style={{ marginTop: '20px' }}>Register Lastname</label>
+        <input id="lastnameR" name="lastnameR" type="text" value={lastnameR} onChange={e => setLastnameR(e.target.value)} />
+        
+        <input type="submit" value="Register" style={{ marginTop: '20px' }}/>
       </form>
 
       <button style={{ marginTop: '60px', width:'100%', maxWidth:'600px' }} onClick={handleRetrieveUser}>getUser</button>
