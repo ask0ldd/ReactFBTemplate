@@ -64,6 +64,22 @@ function App() {
     }
   }
 
+  async function handleDeleteUser(event : React.MouseEvent){
+    event.preventDefault();
+    try{
+      if(!auth.currentUser?.uid) throw new Error("A user must be logged first.")
+      await userService.deleteByUID(auth.currentUser?.uid)
+    } catch (error: unknown) {
+      if (error instanceof FirebaseError) {
+        console.error("Firebase error:", error.message);
+      } else if (error instanceof Error) {
+        console.error("Error:", error.message);
+      } else {
+        console.error("Unknown error:", error);
+      }
+    }
+  }
+
   async function handleRetrieveUser(event : React.MouseEvent){
     event.preventDefault();
     try {
@@ -147,6 +163,7 @@ function App() {
       <button style={{ marginTop: '60px', width:'100%', maxWidth:'600px' }} onClick={handleRetrieveUser}>getUser</button>
       
       <button style={{ marginTop: '60px', width:'100%', maxWidth:'600px' }} onClick={handleDisconnectUser}>Disconnect</button>
+      <button style={{ marginTop: '60px', width:'100%', maxWidth:'600px' }} onClick={handleDeleteUser}>Delete Active User</button>
     </main>
   );
 }
