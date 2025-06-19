@@ -1,4 +1,4 @@
-import { collection, doc, getDocs, query, setDoc, where } from "firebase/firestore";
+import { collection, deleteDoc, doc, getDocs, query, setDoc, where } from "firebase/firestore";
 import type IUser from "./interfaces/IUser";
 import type { UserService } from "./interfaces/UserService";
 import { firestore } from "../../firebase";
@@ -72,6 +72,18 @@ export default class FirebaseUserService implements UserService{
                 id: parsedUser.uid,
                 ...parsedUser
             };
+        } catch (error: unknown) {
+            // !!! deal with ZodError instance
+            console.error("Error inserting user:", error);
+            throw error;
+        }
+    }
+
+    async deleteByUID(uid: string): Promise<void> {
+        try{
+            const usersRef = collection(firestore, "users");
+            const userDocRef = doc(usersRef, uid);
+            await deleteDoc(userDocRef);
         } catch (error: unknown) {
             // !!! deal with ZodError instance
             console.error("Error inserting user:", error);
