@@ -5,6 +5,6 @@ export interface UserService {
   getAll() : Promise<IUser[]>
   insert(user : Omit<IUser, 'id'>) : Promise<IUser>
   deleteByUID(uid : string) : Promise<void>
-  /*updateByUID(uid : string, user : Omit<IUser, 'id'>) : Promise<IUser>
-  deleteByUID(uid : string) : Promise<void>*/
+  updateByUID(uid : string, user : Omit<IUser, 'id'>) : Promise<IUser>
+  updateUserNames(uid: string, newNames: {firstname : string, lastname : string}): Promise<void>
 }

@@ -1,4 +1,4 @@
-import { collection, deleteDoc, doc, getDocs, query, setDoc, where } from "firebase/firestore";
+import { collection, deleteDoc, doc, getDocs, query, setDoc, updateDoc, where } from "firebase/firestore";
 import type IUser from "./interfaces/IUser";
 import type { UserService } from "./interfaces/UserService";
 import { firestore } from "../../firebase";
@@ -87,6 +87,54 @@ export default class FirebaseUserService implements UserService{
         } catch (error: unknown) {
             // !!! deal with ZodError instance
             console.error("Error inserting user:", error);
+            throw error;
+        }
+    }
+
+    async updateByUID(uid: string, user: Omit<IUser, "id">): Promise<IUser> {
+        try {
+            // Validate the user data with Zod
+            const parsedUser = userSchema.parse(user);
+
+            // Get a reference to the user document using the UID as the document ID
+            const usersRef = collection(firestore, "users");
+            const userDocRef = doc(usersRef, uid);
+
+            // Update the document with the new data
+            await setDoc(userDocRef, parsedUser, { merge: true });
+
+            // Return the updated user object
+            return {
+                id: uid,
+                ...parsedUser
+            };
+        } catch (error: unknown) {
+            if (error instanceof Error && error.name === "ZodError") {
+                // Handle Zod validation errors specifically
+                console.error("Validation error updating user:", error);
+                throw new Error("Validation failed: " + error.message);
+            } else {
+                // Handle other errors
+                console.error("Error updating user:", error);
+                throw error;
+            }
+        }
+    }
+
+    async updateUserNames(uid: string, newNames: {firstname : string, lastname : string}): Promise<void> {
+        try {
+            const parsedNames = userSchema.pick({ firstname: true, lastname: true }).parse(newNames)
+
+            const usersRef = collection(firestore, "users");
+            const userDocRef = doc(usersRef, uid);
+
+            // Update only the specified fields
+            await updateDoc(userDocRef, {
+                firstname: parsedNames.firstname,
+                lastname: parsedNames.lastname
+            });
+        } catch (error: unknown) {
+            console.error("Error updating user names:", error);
             throw error;
         }
     }
