@@ -136,7 +136,7 @@ function App() {
 
       const user = auth.currentUser;
       if (!user) throw new Error("No user is currently signed in.");
-      await userService.updateUserNames(user.uid, {firstname : 'john', lastname : 'doe'})
+      await userService.updateUserNamesByUID(user.uid, {firstname : 'john', lastname : 'doe'})
 
     } catch (error: unknown) {
       if (error instanceof FirebaseError) {
