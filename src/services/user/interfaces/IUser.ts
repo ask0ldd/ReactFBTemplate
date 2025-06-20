@@ -1,9 +1,9 @@
 export default interface IUser{
-    id : string
+    uid : string
     firstname : string
     lastname : string
     displayName : string
-    uid : string
+    // uid : string
 }
 
 /*
