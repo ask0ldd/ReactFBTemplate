@@ -1,4 +1,4 @@
-import { collection, deleteDoc, doc, getDocs, query, setDoc, updateDoc, where } from "firebase/firestore";
+import { collection, deleteDoc, doc, getDoc, getDocs, setDoc, updateDoc } from "firebase/firestore";
 import type IUser from "./interfaces/IUser";
 import type { UserService } from "./interfaces/UserService";
 import { firestore } from "../../firebase";
@@ -7,45 +7,41 @@ import userSchema from "../../zod/userSchema";
 export default class FirebaseUserService implements UserService{
     async findByUID(uid: string): Promise<IUser> {
         try{
-            const usersRef = collection(firestore, "users");
-            const q = query(usersRef, where("uid", "==", uid));
-            const snapshot = await getDocs(q)
+            const usersCollectionRef = collection(firestore, "users");
+            const userDocRef = doc(usersCollectionRef, uid)
+            const userDocSnap = await getDoc(userDocRef);
 
-            if (snapshot.empty) {
+            if (!userDocSnap.exists()) {
                 throw new Error("No user document found for the requested user.");
             }
 
-            const doc = snapshot.docs[0]
-            
-            // !!! zod?
-            const user = doc.data()
+            const userData = userDocSnap.data();
+            const user = userSchema.omit({ uid: true }).parse(userData);
 
-            return ({
-                id: doc.id,
+            return {
+                uid: userDocSnap.id,
                 firstname: user.firstname,
                 lastname: user.lastname,
                 displayName: user.displayName,
-                uid: user.uid
-            })
-        }catch(error : unknown){
-            console.error(error)
-            throw error
+            };
+            }catch(error : unknown){
+                console.error(error)
+                throw error
+            }
         }
-    }
 
     async getAll(): Promise<IUser[]> {
         try{
-            const usersCollection = collection(firestore, "users");
-            const snapshot = await getDocs(usersCollection);
+            const usersCollectionRef = collection(firestore, "users");
+            const snapshot = await getDocs(usersCollectionRef);
             const users = snapshot.docs.map(doc => {
                 // !!! zod?
                 const user = doc.data()
                 return ({
-                    id: doc.id,
+                    uid: doc.id,
                     firstname: user.firstname,
                     lastname: user.lastname,
                     displayName: user.displayName,
-                    uid: user.uid
                 })
             })
             return users
@@ -56,20 +52,21 @@ export default class FirebaseUserService implements UserService{
     }
 
     // addDoc for auto-generated IDs, or setDoc if you want to use a custom ID
-    async insert(user : Omit<IUser, 'id'>) : Promise<IUser>{
+    async insert(user : IUser) : Promise<IUser>{
         try {
-            // Optional: Validate user data (uncomment and adapt as needed)
+            // user data validation
             const parsedUser = userSchema.parse(user);
-
-            const usersRef = collection(firestore, "users");
-            // Create a document reference with the user's UID as the document ID
-            const userDocRef = doc(usersRef, parsedUser.uid);
-            // Set the document data
+            
+            // create a ref to a doc having the specific uid
+            const usersCollectionRef = collection(firestore, "users");
+            const userDocRef = doc(usersCollectionRef, parsedUser.uid);
+            
+            // create the doc
             await setDoc(userDocRef, parsedUser);
 
-            // Return the inserted user with the new document ID
+            // !!! faire un get
+
             return {
-                id: parsedUser.uid,
                 ...parsedUser
             };
         } catch (error: unknown) {
@@ -81,8 +78,10 @@ export default class FirebaseUserService implements UserService{
 
     async deleteByUID(uid: string): Promise<void> {
         try{
-            const usersRef = collection(firestore, "users");
-            const userDocRef = doc(usersRef, uid);
+            // create a ref to the target doc
+            const usersCollectionRef = collection(firestore, "users");
+            const userDocRef = doc(usersCollectionRef, uid);
+
             await deleteDoc(userDocRef);
         } catch (error: unknown) {
             // !!! deal with ZodError instance
@@ -93,19 +92,17 @@ export default class FirebaseUserService implements UserService{
 
     async updateByUID(uid: string, user: Omit<IUser, "id">): Promise<IUser> {
         try {
-            // Validate the user data with Zod
+            // user data validation
             const parsedUser = userSchema.parse(user);
 
-            // Get a reference to the user document using the UID as the document ID
-            const usersRef = collection(firestore, "users");
-            const userDocRef = doc(usersRef, uid);
+            // create a ref to the target doc
+            const usersCollectionRef = collection(firestore, "users");
+            const userDocRef = doc(usersCollectionRef, uid);
 
-            // Update the document with the new data
+            // update the document with the new data
             await setDoc(userDocRef, parsedUser, { merge: true });
 
-            // Return the updated user object
             return {
-                id: uid,
                 ...parsedUser
             };
         } catch (error: unknown) {
@@ -121,14 +118,16 @@ export default class FirebaseUserService implements UserService{
         }
     }
 
-    async updateUserNames(uid: string, newNames: {firstname : string, lastname : string}): Promise<void> {
+    async updateUserNamesByUID(uid: string, newNames: {firstname : string, lastname : string}): Promise<void> {
         try {
+            // names validation
             const parsedNames = userSchema.pick({ firstname: true, lastname: true }).parse(newNames)
 
-            const usersRef = collection(firestore, "users");
-            const userDocRef = doc(usersRef, uid);
+            // create a ref to the target doc
+            const usersCollectionRef = collection(firestore, "users");
+            const userDocRef = doc(usersCollectionRef, uid);
 
-            // Update only the specified fields
+            // update only the specified fields
             await updateDoc(userDocRef, {
                 firstname: parsedNames.firstname,
                 lastname: parsedNames.lastname
