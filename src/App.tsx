@@ -2,9 +2,7 @@
 import {useState} from 'react';
 import './App.css'
 import { FirebaseError } from 'firebase/app';
-import FirebaseAuthService from './services/auth/FirebaseAuthService';
 import { auth } from './firebase';
-import FirebaseUserService from './services/user/FirebaseUserService';
 import { useAuthContext } from './hooks/context/useAuth';
 import { useServicesContext } from './hooks/context/useServices';
 
@@ -103,6 +101,11 @@ function App() {
         console.error("Unknown error:", error);
       }
     }
+  }
+
+  async function handleRetrieveAllUsers(){
+    const users = await userService.getAll()
+    console.log(JSON.stringify(users))
   }
 
   async function handleUpdateIdentity(event : React.MouseEvent){
@@ -205,6 +208,7 @@ function App() {
       </form>
 
       <button style={{ marginTop: '60px', width:'100%', maxWidth:'600px' }} onClick={handleRetrieveUser}>getUser</button>
+      <button style={{ marginTop: '60px', width:'100%', maxWidth:'600px' }} onClick={handleRetrieveAllUsers}>getAllUsers</button>
       
       <button style={{ marginTop: '60px', width:'100%', maxWidth:'600px' }} onClick={handleDisconnectUser}>Disconnect</button>
       <button style={{ marginTop: '60px', width:'100%', maxWidth:'600px' }} onClick={handleDeleteUser}>Delete Active User</button>

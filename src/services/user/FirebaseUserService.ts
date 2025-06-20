@@ -90,10 +90,10 @@ export default class FirebaseUserService implements UserService{
         }
     }
 
-    async updateByUID(uid: string, user: Omit<IUser, "id">): Promise<IUser> {
+    async updateByUID(uid: string, user: Omit<IUser, "uid">): Promise<IUser> {
         try {
             // user data validation
-            const parsedUser = userSchema.parse(user);
+            const parsedUser = userSchema.omit({ uid: true }).parse(user);
 
             // create a ref to the target doc
             const usersCollectionRef = collection(firestore, "users");
@@ -102,16 +102,22 @@ export default class FirebaseUserService implements UserService{
             // update the document with the new data
             await setDoc(userDocRef, parsedUser, { merge: true });
 
+            const updatedUser = await getDoc(userDocRef);
+            if (!updatedUser.exists()) {
+                throw new Error("User not found after update");
+            }
+
+            const parsedUpdatedUser = userSchema.omit({ uid: true }).parse(user);
+
             return {
-                ...parsedUser
+                uid : uid,
+                ...parsedUpdatedUser
             };
         } catch (error: unknown) {
             if (error instanceof Error && error.name === "ZodError") {
-                // Handle Zod validation errors specifically
                 console.error("Validation error updating user:", error);
                 throw new Error("Validation failed: " + error.message);
             } else {
-                // Handle other errors
                 console.error("Error updating user:", error);
                 throw error;
             }
