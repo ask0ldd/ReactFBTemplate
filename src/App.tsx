@@ -5,6 +5,7 @@ import { FirebaseError } from 'firebase/app';
 import { auth } from './firebase';
 import { useAuthContext } from './hooks/context/useAuth';
 import { useServicesContext } from './hooks/context/useServices';
+import Header from './components/Header';
 
 // https://hackernoon.com/how-to-set-up-firebase-authentication-with-react
 // https://firebase.google.com/docs/auth
@@ -166,6 +167,7 @@ function App() {
 
   return (
     <main>
+      <Header activeMenuItem=""/>
       <div>{authenticatedUser?.email ?? ''}</div>
       <form onSubmit={handleLogin}>
         <label htmlFor="email">Login</label>

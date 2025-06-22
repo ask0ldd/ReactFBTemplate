@@ -6,7 +6,8 @@
   align-items: center;
 }
 
-main {
+main,
+.globalContainer {
   max-width: 1440px;
   width: 100%;
   display: flex;
