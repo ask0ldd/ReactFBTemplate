@@ -9,6 +9,7 @@ import Route from './router/Route.tsx'
 import { RouterProvider } from './router/RouterProvider.tsx'
 import Register from './pages/Register.tsx'
 import Testing from './pages/Testing.tsx'
+import GoogleSignIn from './pages/GoogleSignIn.tsx'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
@@ -19,6 +20,7 @@ createRoot(document.getElementById('root')!).render(
           <Route path={"/login"} element={<Login />} />
           <Route path={"/register"} element={<Register />} />
           <Route path={"/tests"} element={<Testing />} />
+          <Route path={"/google"} element={<GoogleSignIn />} />
       </RouterProvider>
       </AuthProvider>
     </ServicesProvider>
