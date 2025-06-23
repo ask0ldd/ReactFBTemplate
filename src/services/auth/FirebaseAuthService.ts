@@ -54,4 +54,13 @@ export default class FirebaseAuthService implements AuthService{
         }
 
     }
+
+    async disconnect(){
+        try{
+            await auth.signOut()
+        }catch(error : unknown){
+            console.error(JSON.stringify(error))
+        }
+
+    }
 }
